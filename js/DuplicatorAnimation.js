@@ -9,6 +9,7 @@ export class DuplicatorAnimation {
         this.rotationOffset = 0;
         this.positionXOffset = 10;
         this.positionYOffset = 10;
+        this.imageSize = 1.0; // Scale factor for the uploaded image
 
         // Animation
         this.animationProperty = 'none';
@@ -50,13 +51,17 @@ export class DuplicatorAnimation {
             case 'timeOffset':
                 this.timeOffset = parseFloat(value);
                 break;
+            case 'imageSize':
+                this.imageSize = parseFloat(value);
+                break;
         }
     }
 
     render(ctx, width, height, time) {
         if (!this.sourceImage) return;
 
-        for (let i = 0; i < this.duplicates; i++) {
+        // Render duplicates from highest index to lowest (bottom to top)
+        for (let i = this.duplicates - 1; i >= 0; i--) {
             ctx.save();
 
             // Calculate cumulative transformation
@@ -92,10 +97,10 @@ export class DuplicatorAnimation {
                 }
             }
 
-            // Draw image centered
-            const imgWidth = this.sourceImage.width;
-            const imgHeight = this.sourceImage.height;
-            ctx.drawImage(this.sourceImage, -imgWidth / 2, -imgHeight / 2);
+            // Draw image centered with image size scaling
+            const imgWidth = this.sourceImage.width * this.imageSize;
+            const imgHeight = this.sourceImage.height * this.imageSize;
+            ctx.drawImage(this.sourceImage, -imgWidth / 2, -imgHeight / 2, imgWidth, imgHeight);
 
             ctx.restore();
         }

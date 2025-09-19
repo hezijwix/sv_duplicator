@@ -12,6 +12,7 @@ class DuplicatorAnimation {
         this.rotationOffset = 0;
         this.positionXOffset = 10;
         this.positionYOffset = 10;
+        this.imageSize = 1.0; // Scale factor for the uploaded image
 
         // Animation
         this.animationProperty = 'none';
@@ -53,13 +54,17 @@ class DuplicatorAnimation {
             case 'timeOffset':
                 this.timeOffset = parseFloat(value);
                 break;
+            case 'imageSize':
+                this.imageSize = parseFloat(value);
+                break;
         }
     }
 
     render(ctx, width, height, time) {
         if (!this.sourceImage) return;
 
-        for (let i = 0; i < this.duplicates; i++) {
+        // Render duplicates from highest index to lowest (bottom to top)
+        for (let i = this.duplicates - 1; i >= 0; i--) {
             ctx.save();
 
             // Calculate cumulative transformation
@@ -95,10 +100,10 @@ class DuplicatorAnimation {
                 }
             }
 
-            // Draw image centered
-            const imgWidth = this.sourceImage.width;
-            const imgHeight = this.sourceImage.height;
-            ctx.drawImage(this.sourceImage, -imgWidth / 2, -imgHeight / 2);
+            // Draw image centered with image size scaling
+            const imgWidth = this.sourceImage.width * this.imageSize;
+            const imgHeight = this.sourceImage.height * this.imageSize;
+            ctx.drawImage(this.sourceImage, -imgWidth / 2, -imgHeight / 2, imgWidth, imgHeight);
 
             ctx.restore();
         }
@@ -297,6 +302,13 @@ class FlexibleCanvasManager {
             document.getElementById('duplicator-image-input').value = '';
         });
 
+        // Image size slider
+        document.getElementById('image-size-slider').addEventListener('input', (e) => {
+            const value = parseFloat(e.target.value);
+            this.duplicatorAnimation.setParameter('imageSize', value);
+            document.getElementById('image-size-value').textContent = Math.round(value * 100) + '%';
+        });
+
         // Duplicates slider
         document.getElementById('duplicates-slider').addEventListener('input', (e) => {
             const value = parseInt(e.target.value);
@@ -396,10 +408,19 @@ class FlexibleCanvasManager {
     }
 
     render() {
+        const time = Date.now() * 0.001;
+        this.renderFrame(time);
+    }
+
+    renderFrame(time) {
         // Set background
         if (this.isTransparent) {
+            // For transparent background, only clear (don't draw checkers for export)
             this.ctx.clearRect(0, 0, this.width, this.height);
-            this.drawTransparencyCheckers();
+            // Only draw checkers for display, not for export
+            if (!this.isExporting) {
+                this.drawTransparencyCheckers();
+            }
         } else if (this.backgroundImage) {
             this.ctx.drawImage(this.backgroundImage, 0, 0, this.width, this.height);
         } else {
@@ -408,7 +429,6 @@ class FlexibleCanvasManager {
         }
 
         // Duplicator Animation
-        const time = Date.now() * 0.001;
         this.duplicatorAnimation.render(this.ctx, this.width, this.height, time);
 
         // Draw foreground image if exists
@@ -496,6 +516,7 @@ class FlexibleCanvasManager {
 
             exportBtn.textContent = 'Exporting...';
             exportBtn.disabled = true;
+            this.isExporting = true;
 
             const readmeContent = `PNG Sequence Export
 ===========================
@@ -515,8 +536,14 @@ Timestamp: ${new Date().toISOString()}`;
 
             for (let frame = 0; frame < frames; frame++) {
                 const time = frame / fps;
-                this.render();
 
+                // Clear canvas completely to ensure transparency
+                this.ctx.clearRect(0, 0, this.width, this.height);
+
+                // Render frame with correct time for animation
+                this.renderFrame(time);
+
+                // Get frame data with alpha channel
                 const dataURL = this.canvas.toDataURL('image/png');
                 const base64Data = dataURL.split(',')[1];
 
@@ -549,6 +576,7 @@ Timestamp: ${new Date().toISOString()}`;
 
         exportBtn.textContent = originalText;
         exportBtn.disabled = false;
+        this.isExporting = false;
     }
 
     async exportMP4(duration) {

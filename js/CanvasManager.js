@@ -194,6 +194,13 @@ export class FlexibleCanvasManager {
             document.getElementById('duplicator-image-input').value = '';
         });
 
+        // Image size slider
+        document.getElementById('image-size-slider').addEventListener('input', (e) => {
+            const value = parseFloat(e.target.value);
+            this.duplicatorAnimation.setParameter('imageSize', value);
+            document.getElementById('image-size-value').textContent = Math.round(value * 100) + '%';
+        });
+
         // Duplicates slider
         document.getElementById('duplicates-slider').addEventListener('input', (e) => {
             const value = parseInt(e.target.value);
@@ -295,10 +302,19 @@ export class FlexibleCanvasManager {
     }
 
     render() {
+        const time = Date.now() * 0.001;
+        this.renderFrame(time);
+    }
+
+    renderFrame(time) {
         // Set background
         if (this.isTransparent) {
+            // For transparent background, only clear (don't draw checkers for export)
             this.ctx.clearRect(0, 0, this.width, this.height);
-            this.drawTransparencyCheckers();
+            // Only draw checkers for display, not for export
+            if (!this.isExporting) {
+                this.drawTransparencyCheckers();
+            }
         } else if (this.backgroundImage) {
             this.ctx.drawImage(this.backgroundImage, 0, 0, this.width, this.height);
         } else {
@@ -307,7 +323,6 @@ export class FlexibleCanvasManager {
         }
 
         // Duplicator Animation
-        const time = Date.now() * 0.001;
         this.duplicatorAnimation.render(this.ctx, this.width, this.height, time);
 
         // Draw foreground image if exists
@@ -395,6 +410,7 @@ export class FlexibleCanvasManager {
 
             exportBtn.textContent = 'Exporting...';
             exportBtn.disabled = true;
+            this.isExporting = true;
 
             // Generate README
             const readmeContent = `PNG Sequence Export
@@ -416,10 +432,13 @@ Timestamp: ${new Date().toISOString()}`;
             for (let frame = 0; frame < frames; frame++) {
                 const time = frame / fps;
 
-                // Clear and render frame
-                this.render();
+                // Clear canvas completely to ensure transparency
+                this.ctx.clearRect(0, 0, this.width, this.height);
 
-                // Get frame data
+                // Render frame with correct time for animation
+                this.renderFrame(time);
+
+                // Get frame data with alpha channel
                 const dataURL = this.canvas.toDataURL('image/png');
                 const base64Data = dataURL.split(',')[1];
 
@@ -457,6 +476,7 @@ Timestamp: ${new Date().toISOString()}`;
 
         exportBtn.textContent = originalText;
         exportBtn.disabled = false;
+        this.isExporting = false;
     }
 
     async exportMP4(duration) {
