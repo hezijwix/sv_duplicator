@@ -10,12 +10,12 @@ Duplicator is a generative design tool for graphic designers who aren't animator
 
 ### Using the Tool
 ```bash
-# Open the Duplicator tool directly in browser
-open start_template.html
+# Open the Duplicator tool directly in browser (works immediately)
+open index.html
 
-# Or serve with a local server for full functionality
+# Alternative: For ES6 module development, serve with local server
 python -m http.server 8000
-# Then navigate to http://localhost:8000/start_template.html
+# Then navigate to http://localhost:8000
 ```
 
 ### Basic Workflow
@@ -33,7 +33,12 @@ python -m http.server 8000
 ### File Organization
 ```
 Duplicator/
-├── start_template.html           # Main tool file with integrated functionality
+├── index.html                    # Main HTML file with UI structure
+├── js/                           # JavaScript modules
+│   ├── main.js                   # Application entry point (ES6 modules)
+│   ├── CanvasManager.js          # Canvas management and event handling (ES6 modules)
+│   ├── DuplicatorAnimation.js    # Core duplication engine (ES6 modules)
+│   └── duplicator-combined.js    # Combined file for direct browser use
 ├── styles/                       # CSS design system
 │   ├── variables.css             # CSS custom properties and theming
 │   ├── base.css                  # Base typography and layout
@@ -267,11 +272,26 @@ The Duplicator tool is built as an **integrated enhancement** to the existing ca
 4. **Export Compatibility**: Works with all existing export formats
 
 ### Key Features
-- **Single File Solution**: Everything contained in start_template.html
-- **No Dependencies**: Pure JavaScript implementation
+- **Dual Architecture**: Both modular ES6 and combined approaches supported
+- **Direct Browser Use**: Works immediately without server setup
+- **ES6 Module Development**: Clean modular structure for development
 - **Alpha Channel Support**: Full transparency preservation
 - **Responsive Design**: Adapts to different screen sizes
 - **Professional Export**: PNG, MP4, PNG sequences with metadata
+
+### Architecture Approaches
+
+#### Production Use (Default)
+- Uses `duplicator-combined.js` for immediate browser compatibility
+- No server required, works with `file://` protocol
+- Single JavaScript file with all functionality
+- Perfect for end users and distribution
+
+#### Development Use (Optional)
+- Switch to ES6 modules by editing `index.html`
+- Change script tag to: `<script type="module" src="js/main.js"></script>`
+- Requires local server for CORS compliance
+- Clean modular structure for development and maintenance
 
 ### Design Philosophy
 Built specifically for **graphic designers who aren't animators**, the tool focuses on:

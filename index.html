@@ -3,21 +3,25 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SV Tools - Modular Animation Framework</title>
-    
+    <title>Duplicator Tool</title>
     <!-- Google Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400..700&display=swap" rel="stylesheet">
-    
-    <!-- Stylesheets -->
-    <link rel="stylesheet" href="css/main.css">
-    <link rel="stylesheet" href="css/animations.css">
+
+    <!-- Stylesheet References -->
+    <link rel="stylesheet" href="styles/variables.css">
+    <link rel="stylesheet" href="styles/base.css">
+    <link rel="stylesheet" href="styles/layout.css">
+    <link rel="stylesheet" href="styles/controls.css">
+    <link rel="stylesheet" href="styles/buttons.css">
+    <link rel="stylesheet" href="styles/modal.css">
+    <link rel="stylesheet" href="styles/utils.css">
 </head>
 <body>
     <!-- Header -->
     <div class="header">
-        <div class="header-title">SV Tools - Animation Framework</div>
+        <div class="header-title">Duplicator Tool</div>
         <div class="header-credit">MADE BY STUDIO-VIDEO</div>
     </div>
 
@@ -50,7 +54,10 @@
                     <div class="preset-btn" data-size="3840,2160">4K</div>
                     <div class="preset-btn" data-size="1200,800">Custom</div>
                 </div>
+                
             </div>
+
+
 
             <!-- BACKGROUND SECTION -->
             <div class="controls-section section-with-divider">
@@ -84,7 +91,71 @@
                 <input type="file" id="fg-image-input" accept="image/*" style="display: none;">
             </div>
 
-            <!-- Animation controls will be dynamically inserted here by main.js -->
+            <!-- DUPLICATOR SECTION -->
+            <div class="controls-section section-with-divider">
+                <h4>Duplicator</h4>
+
+                <!-- Image Upload -->
+                <div class="control-btn image-upload-btn" id="duplicator-upload-btn" style="text-align: center; position: relative;">
+                    <span class="upload-text">Upload Image</span>
+                    <span class="remove-image" id="duplicator-remove-btn" style="display: none;">&times;</span>
+                </div>
+                <input type="file" id="duplicator-image-input" accept="image/*" style="display: none;">
+
+                <!-- Number of Duplicates -->
+                <div class="frame-control-row" style="margin-top: 16px;">
+                    <label>Duplicates: <span id="duplicates-value">5</span></label>
+                </div>
+                <input type="range" id="duplicates-slider" min="1" max="50" value="5">
+
+                <!-- Transformation Offsets -->
+                <div class="frame-control-row" style="margin-top: 16px;">
+                    <label>Scale Offset: <span id="scale-offset-value">0.00</span></label>
+                </div>
+                <input type="range" id="scale-offset-slider" min="-0.5" max="0.5" step="0.01" value="0">
+
+                <div class="frame-control-row" style="margin-top: 16px;">
+                    <label>Rotation Offset: <span id="rotation-offset-value">0°</span></label>
+                </div>
+                <input type="range" id="rotation-offset-slider" min="-180" max="180" step="1" value="0">
+
+                <div class="frame-control-row" style="margin-top: 16px;">
+                    <label>Position X: <span id="position-x-value">10px</span></label>
+                </div>
+                <input type="range" id="position-x-slider" min="-100" max="100" step="1" value="10">
+
+                <div class="frame-control-row" style="margin-top: 16px;">
+                    <label>Position Y: <span id="position-y-value">10px</span></label>
+                </div>
+                <input type="range" id="position-y-slider" min="-100" max="100" step="1" value="10">
+
+                <!-- Animation Controls -->
+                <div class="frame-control-row" style="margin-top: 20px;">
+                    <label>Animation Property</label>
+                </div>
+                <select id="animation-property">
+                    <option value="none">None</option>
+                    <option value="scale">Scale</option>
+                    <option value="rotation">Rotation</option>
+                    <option value="positionX">Position X</option>
+                    <option value="positionY">Position Y</option>
+                </select>
+
+                <div class="frame-control-row" style="margin-top: 16px;">
+                    <label>Frequency: <span id="frequency-value">1.0 Hz</span></label>
+                </div>
+                <input type="range" id="frequency-slider" min="0.1" max="5" step="0.1" value="1">
+
+                <div class="frame-control-row" style="margin-top: 16px;">
+                    <label>Amplitude: <span id="amplitude-value">50</span></label>
+                </div>
+                <input type="range" id="amplitude-slider" min="0" max="100" step="1" value="50">
+
+                <div class="frame-control-row" style="margin-top: 16px;">
+                    <label>Time Offset: <span id="time-offset-value">5 frames</span></label>
+                </div>
+                <input type="range" id="time-offset-slider" min="0" max="60" step="1" value="5">
+            </div>
 
             <!-- EXPORT SECTION -->
             <div class="controls-section section-with-divider">
@@ -141,10 +212,8 @@
         </div>
     </div>
 
-    <!-- Dependencies -->
+    <!-- Dependencies for export functionality -->
     <script src="https://cdn.jsdelivr.net/npm/jszip@3.10.1/dist/jszip.min.js"></script>
-    
-    <!-- Main JavaScript Module -->
-    <script type="module" src="js/main.js"></script>
+    <script src="js/duplicator-combined.js"></script>
 </body>
 </html>
