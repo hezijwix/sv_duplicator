@@ -236,31 +236,108 @@ export class FlexibleCanvasManager {
             document.getElementById('position-y-value').textContent = value + 'px';
         });
 
-        // Animation property dropdown
-        document.getElementById('animation-property').addEventListener('change', (e) => {
-            this.duplicatorAnimation.setParameter('animationProperty', e.target.value);
-        });
+        // Multi-Parameter Animation Controls
+        this.initializeAnimationControls();
 
-        // Frequency slider
-        document.getElementById('frequency-slider').addEventListener('input', (e) => {
-            const value = parseFloat(e.target.value);
-            this.duplicatorAnimation.setParameter('frequency', value);
-            document.getElementById('frequency-value').textContent = value.toFixed(1) + ' Hz';
-        });
-
-        // Amplitude slider
-        document.getElementById('amplitude-slider').addEventListener('input', (e) => {
-            const value = parseInt(e.target.value);
-            this.duplicatorAnimation.setParameter('amplitude', value);
-            document.getElementById('amplitude-value').textContent = value;
-        });
-
-        // Time offset slider
+        // Time offset slider (global)
         document.getElementById('time-offset-slider').addEventListener('input', (e) => {
             const value = parseInt(e.target.value);
             this.duplicatorAnimation.setParameter('timeOffset', value);
             document.getElementById('time-offset-value').textContent = value + ' frames';
         });
+    }
+
+    initializeAnimationControls() {
+        const parameters = ['scale', 'rotation', 'positionX', 'positionY'];
+
+        parameters.forEach(param => {
+            // Checkbox to enable/disable animation
+            const checkbox = document.getElementById(`anim-${param}-enable`);
+            checkbox.addEventListener('change', (e) => {
+                const enabled = e.target.checked;
+                this.duplicatorAnimation.setParameter(`${param}-enabled`, enabled);
+
+                // Show/hide controls when checkbox is toggled
+                const controls = document.getElementById(`${param}-controls`);
+                const toggle = document.querySelector(`[aria-controls="${param}-controls"]`);
+
+                if (enabled) {
+                    // Auto-expand when enabled
+                    this.expandParameterControls(param);
+                } else {
+                    // Auto-collapse when disabled
+                    this.collapseParameterControls(param);
+                }
+
+                // Update parameter container visual state
+                const paramElement = document.querySelector(`[data-parameter="${param}"]`);
+                if (enabled) {
+                    paramElement.classList.remove('disabled');
+                } else {
+                    paramElement.classList.add('disabled');
+                }
+            });
+
+            // Toggle button to expand/collapse controls
+            const toggle = document.querySelector(`[aria-controls="${param}-controls"]`);
+            toggle.addEventListener('click', (e) => {
+                e.preventDefault();
+                e.stopPropagation();
+
+                const isExpanded = toggle.getAttribute('aria-expanded') === 'true';
+                if (isExpanded) {
+                    this.collapseParameterControls(param);
+                } else {
+                    this.expandParameterControls(param);
+                }
+            });
+
+            // Header click to toggle expand/collapse
+            const header = toggle.closest('.parameter-header');
+            header.addEventListener('click', (e) => {
+                // Don't trigger if clicking the checkbox or its label
+                if (e.target.type === 'checkbox' || e.target.tagName === 'LABEL') return;
+
+                const isExpanded = toggle.getAttribute('aria-expanded') === 'true';
+                if (isExpanded) {
+                    this.collapseParameterControls(param);
+                } else {
+                    this.expandParameterControls(param);
+                }
+            });
+
+            // Frequency slider
+            const frequencySlider = document.getElementById(`${param}-frequency`);
+            frequencySlider.addEventListener('input', (e) => {
+                const value = parseFloat(e.target.value);
+                this.duplicatorAnimation.setParameter(`${param}-frequency`, value);
+                document.getElementById(`${param}-frequency-value`).textContent = value.toFixed(1) + ' Hz';
+            });
+
+            // Amplitude slider
+            const amplitudeSlider = document.getElementById(`${param}-amplitude`);
+            amplitudeSlider.addEventListener('input', (e) => {
+                const value = parseInt(e.target.value);
+                this.duplicatorAnimation.setParameter(`${param}-amplitude`, value);
+                document.getElementById(`${param}-amplitude-value`).textContent = value;
+            });
+        });
+    }
+
+    expandParameterControls(param) {
+        const controls = document.getElementById(`${param}-controls`);
+        const toggle = document.querySelector(`[aria-controls="${param}-controls"]`);
+
+        controls.style.display = 'block';
+        toggle.setAttribute('aria-expanded', 'true');
+    }
+
+    collapseParameterControls(param) {
+        const controls = document.getElementById(`${param}-controls`);
+        const toggle = document.querySelector(`[aria-controls="${param}-controls"]`);
+
+        controls.style.display = 'none';
+        toggle.setAttribute('aria-expanded', 'false');
     }
 
     updateCanvasSize() {

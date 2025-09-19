@@ -167,3 +167,159 @@ input[type="range"]::-moz-range-thumb {
     border-color: var(--focus-color);
     box-shadow: 0 0 0 2px var(--focus-shadow);
 }
+
+/* Multi-Parameter Animation Controls */
+.animation-controls-section {
+    margin-top: 20px;
+}
+
+.animation-parameter {
+    margin-bottom: 16px;
+    border: 1px solid var(--border-color-subtle);
+    border-radius: 4px;
+    background-color: var(--bg-secondary);
+}
+
+.parameter-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 12px;
+    cursor: pointer;
+    border-radius: 4px 4px 0 0;
+    transition: background-color 0.15s ease;
+}
+
+.parameter-header:hover {
+    background-color: var(--bg-tertiary);
+}
+
+.parameter-checkbox-wrapper {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex: 1;
+}
+
+.animation-checkbox {
+    width: 16px;
+    height: 16px;
+    accent-color: var(--focus-color);
+    cursor: pointer;
+    margin: 0;
+}
+
+.animation-checkbox + label {
+    color: var(--text-color);
+    font-size: 12px;
+    font-weight: 400;
+    cursor: pointer;
+    margin: 0;
+    user-select: none;
+}
+
+.animation-checkbox:checked + label {
+    color: var(--text-color-bright);
+}
+
+.parameter-toggle {
+    background: none;
+    border: none;
+    color: var(--text-color-light);
+    cursor: pointer;
+    padding: 4px;
+    border-radius: 2px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: color 0.15s ease, transform 0.2s ease;
+    min-width: 24px;
+    height: 24px;
+}
+
+.parameter-toggle:hover {
+    color: var(--text-color);
+    background-color: var(--bg-tertiary);
+}
+
+.parameter-toggle:focus {
+    outline: none;
+    box-shadow: 0 0 0 2px var(--focus-shadow);
+}
+
+.toggle-icon {
+    transition: transform 0.2s ease;
+    font-size: 10px;
+    line-height: 1;
+}
+
+.parameter-toggle[aria-expanded="true"] .toggle-icon {
+    transform: rotate(90deg);
+}
+
+.parameter-controls {
+    padding: 16px;
+    border-top: 1px solid var(--border-color-subtle);
+    background-color: var(--bg-tertiary);
+    border-radius: 0 0 4px 4px;
+    transition: all 0.2s ease;
+}
+
+.parameter-controls .frame-control-row {
+    margin-bottom: 8px;
+}
+
+.parameter-controls .frame-control-row:last-of-type {
+    margin-bottom: 12px;
+}
+
+.parameter-controls input[type="range"] {
+    margin: 4px 0 12px 0;
+}
+
+.global-control {
+    margin-top: 20px;
+    padding-top: 16px;
+    border-top: 1px solid var(--border-color-subtle);
+}
+
+.global-control .frame-control-row {
+    margin-bottom: 8px;
+}
+
+/* Animation parameter states */
+.animation-parameter.disabled {
+    opacity: 0.6;
+}
+
+.animation-parameter.disabled .parameter-header {
+    cursor: default;
+}
+
+.animation-parameter.disabled .parameter-toggle {
+    cursor: default;
+    opacity: 0.5;
+}
+
+/* Smooth expand/collapse animation */
+@media (prefers-reduced-motion: no-preference) {
+    .parameter-controls {
+        overflow: hidden;
+        transition: max-height 0.3s ease, padding 0.3s ease, opacity 0.2s ease;
+    }
+
+    .parameter-controls[style*="display: none"] {
+        max-height: 0;
+        padding: 0 16px;
+        opacity: 0;
+    }
+}
+
+/* Accessibility improvements */
+@media (prefers-reduced-motion: reduce) {
+    .parameter-toggle,
+    .toggle-icon,
+    .parameter-controls {
+        transition: none;
+    }
+}

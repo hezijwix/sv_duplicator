@@ -14,11 +14,14 @@ class DuplicatorAnimation {
         this.positionYOffset = 10;
         this.imageSize = 1.0; // Scale factor for the uploaded image
 
-        // Animation
-        this.animationProperty = 'none';
-        this.frequency = 1.0;
-        this.amplitude = 50;
-        this.timeOffset = 5; // frames
+        // Multi-parameter animation system
+        this.animations = {
+            scale: { enabled: false, frequency: 1.0, amplitude: 50 },
+            rotation: { enabled: false, frequency: 1.0, amplitude: 50 },
+            positionX: { enabled: false, frequency: 1.0, amplitude: 50 },
+            positionY: { enabled: false, frequency: 1.0, amplitude: 50 }
+        };
+        this.timeOffset = 5; // frames (global)
     }
 
     setSourceImage(image) {
@@ -42,22 +45,71 @@ class DuplicatorAnimation {
             case 'positionYOffset':
                 this.positionYOffset = parseFloat(value);
                 break;
-            case 'animationProperty':
-                this.animationProperty = value;
-                break;
-            case 'frequency':
-                this.frequency = parseFloat(value);
-                break;
-            case 'amplitude':
-                this.amplitude = parseFloat(value);
-                break;
             case 'timeOffset':
                 this.timeOffset = parseFloat(value);
                 break;
             case 'imageSize':
                 this.imageSize = parseFloat(value);
                 break;
+            // Multi-parameter animation controls
+            default:
+                this.setAnimationParameter(key, value);
+                break;
         }
+    }
+
+    setAnimationParameter(key, value) {
+        // Handle animation enable/disable: "scale-enabled", "rotation-enabled", etc.
+        if (key.endsWith('-enabled')) {
+            const param = key.replace('-enabled', '');
+            if (this.animations[param]) {
+                this.animations[param].enabled = value;
+            }
+        }
+        // Handle animation frequency: "scale-frequency", "rotation-frequency", etc.
+        else if (key.endsWith('-frequency')) {
+            const param = key.replace('-frequency', '');
+            if (this.animations[param]) {
+                this.animations[param].frequency = parseFloat(value);
+            }
+        }
+        // Handle animation amplitude: "scale-amplitude", "rotation-amplitude", etc.
+        else if (key.endsWith('-amplitude')) {
+            const param = key.replace('-amplitude', '');
+            if (this.animations[param]) {
+                this.animations[param].amplitude = parseFloat(value);
+            }
+        }
+        // Legacy support for old single animation system
+        else if (key === 'animationProperty') {
+            // Convert old system to new system
+            this.disableAllAnimations();
+            if (value !== 'none' && this.animations[value]) {
+                this.animations[value].enabled = true;
+            }
+        }
+        else if (key === 'frequency') {
+            // Apply to all enabled animations for legacy support
+            Object.keys(this.animations).forEach(param => {
+                if (this.animations[param].enabled) {
+                    this.animations[param].frequency = parseFloat(value);
+                }
+            });
+        }
+        else if (key === 'amplitude') {
+            // Apply to all enabled animations for legacy support
+            Object.keys(this.animations).forEach(param => {
+                if (this.animations[param].enabled) {
+                    this.animations[param].amplitude = parseFloat(value);
+                }
+            });
+        }
+    }
+
+    disableAllAnimations() {
+        Object.keys(this.animations).forEach(param => {
+            this.animations[param].enabled = false;
+        });
     }
 
     render(ctx, width, height, time) {
@@ -67,38 +119,48 @@ class DuplicatorAnimation {
         for (let i = this.duplicates - 1; i >= 0; i--) {
             ctx.save();
 
-            // Calculate cumulative transformation
-            const scale = Math.pow(1 + this.scaleOffset, i);
-            const rotation = this.rotationOffset * i * Math.PI / 180;
-            let x = width / 2 + this.positionXOffset * i;
-            let y = height / 2 + this.positionYOffset * i;
+            // Calculate base cumulative transformations
+            const baseScale = Math.pow(1 + this.scaleOffset, i);
+            const baseRotation = this.rotationOffset * i * Math.PI / 180;
+            let baseX = width / 2 + this.positionXOffset * i;
+            let baseY = height / 2 + this.positionYOffset * i;
 
-            // Apply transformations
-            ctx.translate(x, y);
-            ctx.rotate(rotation);
-            ctx.scale(scale, scale);
+            // Calculate animated offsets
+            let animatedX = 0;
+            let animatedY = 0;
+            let animatedRotation = 0;
+            let animatedScale = 1;
 
-            // Apply animation (after base transformations)
-            if (this.animationProperty !== 'none') {
-                const animPhase = time - (i * this.timeOffset / 60);
-                const animValue = this.amplitude * Math.sin(this.frequency * animPhase * Math.PI * 2);
+            Object.keys(this.animations).forEach(animParam => {
+                const anim = this.animations[animParam];
+                if (anim.enabled) {
+                    const animPhase = time - (i * this.timeOffset / 60);
+                    const animValue = anim.amplitude * Math.sin(anim.frequency * animPhase * Math.PI * 2);
 
-                switch(this.animationProperty) {
-                    case 'scale':
-                        const animScale = 1 + (animValue / 100); // Convert to scale factor
-                        ctx.scale(animScale, animScale);
-                        break;
-                    case 'rotation':
-                        ctx.rotate(animValue * Math.PI / 180); // Convert to radians
-                        break;
-                    case 'positionX':
-                        ctx.translate(animValue, 0);
-                        break;
-                    case 'positionY':
-                        ctx.translate(0, animValue);
-                        break;
+                    switch(animParam) {
+                        case 'scale':
+                            animatedScale *= 1 + (animValue / 100); // Convert to scale factor
+                            break;
+                        case 'rotation':
+                            animatedRotation += animValue * Math.PI / 180; // Convert to radians
+                            break;
+                        case 'positionX':
+                            animatedX += animValue;
+                            break;
+                        case 'positionY':
+                            animatedY += animValue;
+                            break;
+                    }
                 }
-            }
+            });
+
+            // Apply transformations in correct order to maintain center point
+            // 1. Position (base + animated)
+            ctx.translate(baseX + animatedX, baseY + animatedY);
+            // 2. Rotation (base + animated)
+            ctx.rotate(baseRotation + animatedRotation);
+            // 3. Scale (base * animated)
+            ctx.scale(baseScale * animatedScale, baseScale * animatedScale);
 
             // Draw image centered with image size scaling
             const imgWidth = this.sourceImage.width * this.imageSize;
@@ -344,31 +406,108 @@ class FlexibleCanvasManager {
             document.getElementById('position-y-value').textContent = value + 'px';
         });
 
-        // Animation property dropdown
-        document.getElementById('animation-property').addEventListener('change', (e) => {
-            this.duplicatorAnimation.setParameter('animationProperty', e.target.value);
-        });
+        // Multi-Parameter Animation Controls
+        this.initializeAnimationControls();
 
-        // Frequency slider
-        document.getElementById('frequency-slider').addEventListener('input', (e) => {
-            const value = parseFloat(e.target.value);
-            this.duplicatorAnimation.setParameter('frequency', value);
-            document.getElementById('frequency-value').textContent = value.toFixed(1) + ' Hz';
-        });
-
-        // Amplitude slider
-        document.getElementById('amplitude-slider').addEventListener('input', (e) => {
-            const value = parseInt(e.target.value);
-            this.duplicatorAnimation.setParameter('amplitude', value);
-            document.getElementById('amplitude-value').textContent = value;
-        });
-
-        // Time offset slider
+        // Time offset slider (global)
         document.getElementById('time-offset-slider').addEventListener('input', (e) => {
             const value = parseInt(e.target.value);
             this.duplicatorAnimation.setParameter('timeOffset', value);
             document.getElementById('time-offset-value').textContent = value + ' frames';
         });
+    }
+
+    initializeAnimationControls() {
+        const parameters = ['scale', 'rotation', 'positionX', 'positionY'];
+
+        parameters.forEach(param => {
+            // Checkbox to enable/disable animation
+            const checkbox = document.getElementById(`anim-${param}-enable`);
+            checkbox.addEventListener('change', (e) => {
+                const enabled = e.target.checked;
+                this.duplicatorAnimation.setParameter(`${param}-enabled`, enabled);
+
+                // Show/hide controls when checkbox is toggled
+                const controls = document.getElementById(`${param}-controls`);
+                const toggle = document.querySelector(`[aria-controls="${param}-controls"]`);
+
+                if (enabled) {
+                    // Auto-expand when enabled
+                    this.expandParameterControls(param);
+                } else {
+                    // Auto-collapse when disabled
+                    this.collapseParameterControls(param);
+                }
+
+                // Update parameter container visual state
+                const paramElement = document.querySelector(`[data-parameter="${param}"]`);
+                if (enabled) {
+                    paramElement.classList.remove('disabled');
+                } else {
+                    paramElement.classList.add('disabled');
+                }
+            });
+
+            // Toggle button to expand/collapse controls
+            const toggle = document.querySelector(`[aria-controls="${param}-controls"]`);
+            toggle.addEventListener('click', (e) => {
+                e.preventDefault();
+                e.stopPropagation();
+
+                const isExpanded = toggle.getAttribute('aria-expanded') === 'true';
+                if (isExpanded) {
+                    this.collapseParameterControls(param);
+                } else {
+                    this.expandParameterControls(param);
+                }
+            });
+
+            // Header click to toggle expand/collapse
+            const header = toggle.closest('.parameter-header');
+            header.addEventListener('click', (e) => {
+                // Don't trigger if clicking the checkbox or its label
+                if (e.target.type === 'checkbox' || e.target.tagName === 'LABEL') return;
+
+                const isExpanded = toggle.getAttribute('aria-expanded') === 'true';
+                if (isExpanded) {
+                    this.collapseParameterControls(param);
+                } else {
+                    this.expandParameterControls(param);
+                }
+            });
+
+            // Frequency slider
+            const frequencySlider = document.getElementById(`${param}-frequency`);
+            frequencySlider.addEventListener('input', (e) => {
+                const value = parseFloat(e.target.value);
+                this.duplicatorAnimation.setParameter(`${param}-frequency`, value);
+                document.getElementById(`${param}-frequency-value`).textContent = value.toFixed(1) + ' Hz';
+            });
+
+            // Amplitude slider
+            const amplitudeSlider = document.getElementById(`${param}-amplitude`);
+            amplitudeSlider.addEventListener('input', (e) => {
+                const value = parseInt(e.target.value);
+                this.duplicatorAnimation.setParameter(`${param}-amplitude`, value);
+                document.getElementById(`${param}-amplitude-value`).textContent = value;
+            });
+        });
+    }
+
+    expandParameterControls(param) {
+        const controls = document.getElementById(`${param}-controls`);
+        const toggle = document.querySelector(`[aria-controls="${param}-controls"]`);
+
+        controls.style.display = 'block';
+        toggle.setAttribute('aria-expanded', 'true');
+    }
+
+    collapseParameterControls(param) {
+        const controls = document.getElementById(`${param}-controls`);
+        const toggle = document.querySelector(`[aria-controls="${param}-controls"]`);
+
+        controls.style.display = 'none';
+        toggle.setAttribute('aria-expanded', 'false');
     }
 
     updateCanvasSize() {
