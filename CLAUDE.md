@@ -170,32 +170,34 @@ Export functionality is automatically handled by `ExportManager`. Animations onl
 - **Dark Theme**: Professional dark UI
 - **Responsive**: Adapts to different screen sizes
 
-### Animation Styles (animations.css)
-- **Performance Optimizations**: GPU acceleration settings
-- **Loading States**: Animation loading indicators
-- **Control Styling**: Animation-specific control styles
-- **Framework Support**: Styles for different animation frameworks
+### Control Styles (controls.css)
+- **Range Sliders**: Styled input[type="range"] with consistent theming
+- **Form Controls**: Label positioning and value display formatting
+- **Button States**: Upload button styling with image loaded states
+- **Responsive Layout**: Mobile-friendly control panel organization
 
 ## Best Practices
 
-### Animation Development
-1. **Extend BaseAnimation**: Always inherit from the base class
-2. **Use Parameters**: Make animations configurable through parameters
-3. **Time-based Animation**: Use the time parameter for smooth animations
-4. **Export Compatibility**: Ensure `renderFrame()` works without side effects
-5. **Performance**: Consider canvas size and complexity for 60fps performance
+### Design Workflow
+1. **Start Small**: Begin with 5-10 duplicates to see the pattern
+2. **Incremental Adjustments**: Make small changes to see their cumulative effect
+3. **Test Export Early**: Verify your pattern exports correctly with transparency
+4. **Save Variations**: Screenshot interesting configurations for reference
+5. **Consider Final Use**: Match canvas size to intended output format
 
-### Code Organization
-1. **One Animation Per File**: Keep animations in separate files
-2. **Descriptive Names**: Use clear, descriptive class and file names
-3. **Documentation**: Add comments explaining complex animation logic
-4. **Error Handling**: Handle edge cases gracefully
+### Pattern Creation
+1. **Understand Cumulative Effects**: Each duplicate builds on the previous transformation
+2. **Balance Complexity**: Too many duplicates can create visual chaos
+3. **Use Animation Sparingly**: Static patterns often work better for print
+4. **Mind the Edges**: High position offsets may push duplicates off-canvas
+5. **Alpha Channel Matters**: Use PNG upload for best results
 
-### Framework Integration
-1. **Module Imports**: Use ES6 imports for external libraries
-2. **CDN Links**: Use CDN links in HTML for large libraries
-3. **Fallback Handling**: Provide fallbacks if libraries fail to load
-4. **Performance**: Consider impact of large libraries on load time
+### Performance Optimization
+1. **Monitor Duplicate Count**: 50 duplicates is the maximum for smooth performance
+2. **Canvas Size Impact**: Larger canvases require more processing power
+3. **Animation Complexity**: Multiple animated properties can slow rendering
+4. **Export File Sizes**: PNG sequences can become large with many frames
+5. **Browser Compatibility**: Test exports across different browsers
 
 ## Usage Examples
 
