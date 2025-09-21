@@ -1,22 +1,22 @@
 # Repository Guidelines
 
 ## Project Structure & Module Organization
-The entry point is `index.html`, which wires the canvas UI and loads ES modules from `js/`. Core behavior lives in `js/CanvasManager.js` and `js/DuplicatorAnimation.js`, while `js/main.js` bootstraps the `FlexibleCanvasManager`. Legacy bundle logic remains in `js/duplicator-combined.js` for reference. Styles are organized under `styles/` with single-responsibility CSS files (`base.css`, `layout.css`, `modal.css`, etc.). Supplemental design notes live in `functionality/design-system.md`.
+`index.html` is the launch point and loads ES modules from `js/`. `CanvasManager.js` orchestrates canvas sizing, assets, and exports; `DuplicatorAnimation.js` handles duplicate transforms; `main.js` wires the manager on DOM ready. Keep legacy references in `duplicator-combined.js` for parity checks. Modular styles live in `styles/` (`variables.css`, `layout.css`, `controls.css`, etc.), while `functionality/design-system.md` documents the visual system.
 
 ## Build, Test, and Development Commands
-- `open index.html` — launch the tool directly in the default browser (macOS).
-- `python -m http.server 8000` — serve the project locally for cross-browser testing, then visit `http://localhost:8000`.
-- `npx http-server` — Node-based static server alternative when Python is unavailable.
-Use a local server whenever you need to test asset loading or MediaRecorder export.
+- `python -m http.server 8000` — start a lightweight server and open `http://localhost:8000` for reliable asset loading.
+- `npx http-server` — Node alternative when Python is unavailable.
+- `open index.html` (macOS) — quick spot checks without a server.
+Prefer server-based testing before filming exports so MediaRecorder APIs resolve correctly.
 
 ## Coding Style & Naming Conventions
-JavaScript modules use 4-space indentation, ES module imports, and camelCase for variables, methods, and exported classes (e.g., `FlexibleCanvasManager`). Keep functions pure where possible and funnel DOM lookups through the manager classes. CSS files in `styles/` follow kebab-case filenames and use custom properties defined in `variables.css` for colors and spacing. Prefer descriptive data attributes over new IDs when adding controls.
+Use 4-space indentation and modern ES syntax (modules, const/let, optional chaining). Classes and singletons are `PascalCase`, functions and variables are `camelCase`, CSS files remain `kebab-case`. Extend existing manager patterns for new controls instead of ad-hoc DOM queries. Leverage tokens from `styles/variables.css` rather than hard-coded colors or spacings.
 
 ## Testing Guidelines
-There is no automated test harness; validate changes by running the page in the browser, uploading sample assets, and confirming animation/export flows at multiple canvas sizes. When adjusting animation maths, compare frame behavior with and without source images to ensure transforms remain centered. Document any new manual test cases in your pull request.
+No automated suite exists; rely on manual verification. Exercise multiple canvas presets, toggle transparency, and run two consecutive exports to confirm deterministic MP4/PNG outputs. When altering animation math, test with both image-backed and placeholder runs to ensure center alignment. Capture notable manual scenarios in the pull request body.
 
 ## Commit & Pull Request Guidelines
-Write concise, sentence-style commit messages similar to the existing history (e.g., "Refactor Duplicator tool by replacing start_template.html..."). Group related changes per commit and avoid mixing feature work with formatting-only edits. Pull requests should describe the user-facing impact, list manual test steps, and attach screenshots or screen recordings for UI updates.
+Follow sentence-style commit messages mirroring `git log` (e.g., “Refactor Duplicator tool by replacing start_template.html…”). Isolate feature, UI, and formatting changes into separate commits. Pull requests should summarize the user-facing change, enumerate manual test steps, reference linked issues, and include screenshots or screen recordings for UI shifts.
 
-## Asset & Export Tips
-Store reusable artwork outside the repository and only commit lightweight placeholders. When tweaking export settings, verify MP4 and PNG sequence outputs remain deterministic by running two exports in a row and comparing file sizes.
+## Asset & Configuration Tips
+Keep large or licensed artwork outside the repo and only check in minimal placeholders. Document environment quirks (browser flags, feature toggles) in the PR when relevant so collaborators can reproduce your setup.
