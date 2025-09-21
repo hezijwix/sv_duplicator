@@ -33,64 +33,6 @@
                 <h3>Controls</h3>
             </div>
             
-            <!-- CANVAS SECTION -->
-            <div class="controls-section section-with-divider">
-                <h4>Canvas Size</h4>
-                
-                <div class="frame-control-row">
-                    <label>Dimensions (px)</label>
-                </div>
-                <div class="size-inputs">
-                    <input type="number" id="canvas-width" value="800" min="100" max="5000">
-                    <span style="color: var(--text-color-subtle);">×</span>
-                    <input type="number" id="canvas-height" value="600" min="100" max="5000">
-                </div>
-                
-                <div class="preset-buttons">
-                    <div class="preset-btn" data-size="800,600">HD</div>
-                    <div class="preset-btn" data-size="1920,1080">FHD</div>
-                    <div class="preset-btn" data-size="1080,1080">1:1</div>
-                    <div class="preset-btn" data-size="1080,1920">9:16</div>
-                    <div class="preset-btn" data-size="3840,2160">4K</div>
-                    <div class="preset-btn" data-size="1200,800">Custom</div>
-                </div>
-                
-            </div>
-
-
-
-            <!-- BACKGROUND SECTION -->
-            <div class="controls-section section-with-divider">
-                <h4>Background</h4>
-                
-                <div class="frame-control-row">
-                    <label for="bg-color">Color:</label>
-                    <input type="color" id="bg-color" value="#ffffff" class="color-picker">
-                </div>
-                
-                <div class="frame-control-row" style="margin-top: 12px;">
-                    <label>Mode</label>
-                </div>
-                <select id="bg-transparency">
-                    <option value="opaque">Opaque</option>
-                    <option value="transparent">Transparent</option>
-                </select>
-                
-                <!-- Background & Foreground Image Upload -->
-                <div style="display: flex; gap: 8px; margin-top: 16px;">
-                    <div class="control-btn image-upload-btn" id="bg-upload-btn" style="flex: 1; text-align: center; position: relative;">
-                        <span class="upload-text">Upload BG</span>
-                        <span class="remove-image" id="bg-remove-btn" style="display: none;">&times;</span>
-                    </div>
-                    <div class="control-btn image-upload-btn" id="fg-upload-btn" style="flex: 1; text-align: center; position: relative;">
-                        <span class="upload-text">Upload FG</span>
-                        <span class="remove-image" id="fg-remove-btn" style="display: none;">&times;</span>
-                    </div>
-                </div>
-                <input type="file" id="bg-image-input" accept="image/*" style="display: none;">
-                <input type="file" id="fg-image-input" accept="image/*" style="display: none;">
-            </div>
-
             <!-- DUPLICATOR SECTION -->
             <div class="controls-section section-with-divider">
                 <h4>Duplicator</h4>
@@ -134,115 +76,171 @@
                     <label>Position Y: <span id="position-y-value">10px</span></label>
                 </div>
                 <input type="range" id="position-y-slider" min="-100" max="100" step="1" value="10">
+            </div>
 
-                <!-- Multi-Parameter Animation Controls -->
-                <div class="animation-controls-section" style="margin-top: 20px;">
-                    <h5 style="color: var(--text-color-bright); font-size: 12px; text-transform: uppercase; margin-bottom: 16px;">Animation Controls</h5>
+            <!-- ANIMATION CONTROLS SECTION -->
+            <div class="controls-section section-with-divider">
+                <h4>Animation Controls</h4>
 
-                    <!-- Scale Animation -->
-                    <div class="animation-parameter" data-parameter="scale">
-                        <div class="parameter-header">
-                            <div class="parameter-checkbox-wrapper">
-                                <input type="checkbox" id="anim-scale-enable" class="animation-checkbox">
-                                <label for="anim-scale-enable">Scale Animation</label>
-                            </div>
-                            <button class="parameter-toggle" aria-expanded="false" aria-controls="scale-controls">
-                                <span class="toggle-icon">▶</span>
-                            </button>
+                <!-- Scale Animation -->
+                <div class="animation-parameter" data-parameter="scale">
+                    <div class="parameter-header">
+                        <div class="parameter-checkbox-wrapper">
+                            <input type="checkbox" id="anim-scale-enable" class="animation-checkbox">
+                            <label for="anim-scale-enable">Scale Animation</label>
                         </div>
-                        <div id="scale-controls" class="parameter-controls" style="display: none;">
-                            <div class="frame-control-row">
-                                <label>Frequency: <span id="scale-frequency-value">1.0 Hz</span></label>
-                            </div>
-                            <input type="range" id="scale-frequency" min="0.1" max="2" step="0.05" value="1">
-
-                            <div class="frame-control-row">
-                                <label>Amplitude: <span id="scale-amplitude-value">50</span></label>
-                            </div>
-                            <input type="range" id="scale-amplitude" min="0" max="100" step="1" value="50">
-                        </div>
+                        <button class="parameter-toggle" aria-expanded="false" aria-controls="scale-controls">
+                            <span class="toggle-icon">▶</span>
+                        </button>
                     </div>
-
-                    <!-- Rotation Animation -->
-                    <div class="animation-parameter" data-parameter="rotation">
-                        <div class="parameter-header">
-                            <div class="parameter-checkbox-wrapper">
-                                <input type="checkbox" id="anim-rotation-enable" class="animation-checkbox">
-                                <label for="anim-rotation-enable">Rotation Animation</label>
-                            </div>
-                            <button class="parameter-toggle" aria-expanded="false" aria-controls="rotation-controls">
-                                <span class="toggle-icon">▶</span>
-                            </button>
+                    <div id="scale-controls" class="parameter-controls" style="display: none;">
+                        <div class="frame-control-row">
+                            <label>Frequency: <span id="scale-frequency-value">1.0 Hz</span></label>
                         </div>
-                        <div id="rotation-controls" class="parameter-controls" style="display: none;">
-                            <div class="frame-control-row">
-                                <label>Frequency: <span id="rotation-frequency-value">1.0 Hz</span></label>
-                            </div>
-                            <input type="range" id="rotation-frequency" min="0.1" max="2" step="0.05" value="1">
+                        <input type="range" id="scale-frequency" min="0.1" max="2" step="0.05" value="1">
 
-                            <div class="frame-control-row">
-                                <label>Amplitude: <span id="rotation-amplitude-value">50</span></label>
-                            </div>
-                            <input type="range" id="rotation-amplitude" min="0" max="360" step="5" value="50">
+                        <div class="frame-control-row">
+                            <label>Amplitude: <span id="scale-amplitude-value">50</span></label>
                         </div>
-                    </div>
-
-                    <!-- Position X Animation -->
-                    <div class="animation-parameter" data-parameter="positionX">
-                        <div class="parameter-header">
-                            <div class="parameter-checkbox-wrapper">
-                                <input type="checkbox" id="anim-positionX-enable" class="animation-checkbox">
-                                <label for="anim-positionX-enable">Position X Animation</label>
-                            </div>
-                            <button class="parameter-toggle" aria-expanded="false" aria-controls="positionX-controls">
-                                <span class="toggle-icon">▶</span>
-                            </button>
-                        </div>
-                        <div id="positionX-controls" class="parameter-controls" style="display: none;">
-                            <div class="frame-control-row">
-                                <label>Frequency: <span id="positionX-frequency-value">1.0 Hz</span></label>
-                            </div>
-                            <input type="range" id="positionX-frequency" min="0.1" max="2" step="0.05" value="1">
-
-                            <div class="frame-control-row">
-                                <label>Amplitude: <span id="positionX-amplitude-value">50</span></label>
-                            </div>
-                            <input type="range" id="positionX-amplitude" min="0" max="100" step="1" value="50">
-                        </div>
-                    </div>
-
-                    <!-- Position Y Animation -->
-                    <div class="animation-parameter" data-parameter="positionY">
-                        <div class="parameter-header">
-                            <div class="parameter-checkbox-wrapper">
-                                <input type="checkbox" id="anim-positionY-enable" class="animation-checkbox">
-                                <label for="anim-positionY-enable">Position Y Animation</label>
-                            </div>
-                            <button class="parameter-toggle" aria-expanded="false" aria-controls="positionY-controls">
-                                <span class="toggle-icon">▶</span>
-                            </button>
-                        </div>
-                        <div id="positionY-controls" class="parameter-controls" style="display: none;">
-                            <div class="frame-control-row">
-                                <label>Frequency: <span id="positionY-frequency-value">1.0 Hz</span></label>
-                            </div>
-                            <input type="range" id="positionY-frequency" min="0.1" max="2" step="0.05" value="1">
-
-                            <div class="frame-control-row">
-                                <label>Amplitude: <span id="positionY-amplitude-value">50</span></label>
-                            </div>
-                            <input type="range" id="positionY-amplitude" min="0" max="100" step="1" value="50">
-                        </div>
-                    </div>
-
-                    <!-- Global Time Offset -->
-                    <div class="global-control">
-                        <div class="frame-control-row" style="margin-top: 16px;">
-                            <label>Time Offset: <span id="time-offset-value">5 frames</span></label>
-                        </div>
-                        <input type="range" id="time-offset-slider" min="0" max="60" step="1" value="5">
+                        <input type="range" id="scale-amplitude" min="0" max="100" step="1" value="50">
                     </div>
                 </div>
+
+                <!-- Rotation Animation -->
+                <div class="animation-parameter" data-parameter="rotation">
+                    <div class="parameter-header">
+                        <div class="parameter-checkbox-wrapper">
+                            <input type="checkbox" id="anim-rotation-enable" class="animation-checkbox">
+                            <label for="anim-rotation-enable">Rotation Animation</label>
+                        </div>
+                        <button class="parameter-toggle" aria-expanded="false" aria-controls="rotation-controls">
+                            <span class="toggle-icon">▶</span>
+                        </button>
+                    </div>
+                    <div id="rotation-controls" class="parameter-controls" style="display: none;">
+                        <div class="frame-control-row">
+                            <label>Frequency: <span id="rotation-frequency-value">1.0 Hz</span></label>
+                        </div>
+                        <input type="range" id="rotation-frequency" min="0.1" max="2" step="0.05" value="1">
+
+                        <div class="frame-control-row">
+                            <label>Amplitude: <span id="rotation-amplitude-value">50</span></label>
+                        </div>
+                        <input type="range" id="rotation-amplitude" min="0" max="360" step="5" value="50">
+                    </div>
+                </div>
+
+                <!-- Position X Animation -->
+                <div class="animation-parameter" data-parameter="positionX">
+                    <div class="parameter-header">
+                        <div class="parameter-checkbox-wrapper">
+                            <input type="checkbox" id="anim-positionX-enable" class="animation-checkbox">
+                            <label for="anim-positionX-enable">Position X Animation</label>
+                        </div>
+                        <button class="parameter-toggle" aria-expanded="false" aria-controls="positionX-controls">
+                            <span class="toggle-icon">▶</span>
+                        </button>
+                    </div>
+                    <div id="positionX-controls" class="parameter-controls" style="display: none;">
+                        <div class="frame-control-row">
+                            <label>Frequency: <span id="positionX-frequency-value">1.0 Hz</span></label>
+                        </div>
+                        <input type="range" id="positionX-frequency" min="0.1" max="2" step="0.05" value="1">
+
+                        <div class="frame-control-row">
+                            <label>Amplitude: <span id="positionX-amplitude-value">50</span></label>
+                        </div>
+                        <input type="range" id="positionX-amplitude" min="0" max="100" step="1" value="50">
+                    </div>
+                </div>
+
+                <!-- Position Y Animation -->
+                <div class="animation-parameter" data-parameter="positionY">
+                    <div class="parameter-header">
+                        <div class="parameter-checkbox-wrapper">
+                            <input type="checkbox" id="anim-positionY-enable" class="animation-checkbox">
+                            <label for="anim-positionY-enable">Position Y Animation</label>
+                        </div>
+                        <button class="parameter-toggle" aria-expanded="false" aria-controls="positionY-controls">
+                            <span class="toggle-icon">▶</span>
+                        </button>
+                    </div>
+                    <div id="positionY-controls" class="parameter-controls" style="display: none;">
+                        <div class="frame-control-row">
+                            <label>Frequency: <span id="positionY-frequency-value">1.0 Hz</span></label>
+                        </div>
+                        <input type="range" id="positionY-frequency" min="0.1" max="2" step="0.05" value="1">
+
+                        <div class="frame-control-row">
+                            <label>Amplitude: <span id="positionY-amplitude-value">50</span></label>
+                        </div>
+                        <input type="range" id="positionY-amplitude" min="0" max="100" step="1" value="50">
+                    </div>
+                </div>
+
+                <!-- Global Time Offset -->
+                <div class="global-control">
+                    <div class="frame-control-row" style="margin-top: 16px;">
+                        <label>Time Offset: <span id="time-offset-value">5 frames</span></label>
+                    </div>
+                    <input type="range" id="time-offset-slider" min="0" max="60" step="1" value="5">
+                </div>
+            </div>
+
+            <!-- BACKGROUND SECTION -->
+            <div class="controls-section section-with-divider">
+                <h4>Background</h4>
+
+                <div class="frame-control-row">
+                    <label for="bg-color">Color:</label>
+                    <input type="color" id="bg-color" value="#ffffff" class="color-picker">
+                </div>
+
+                <div class="frame-control-row" style="margin-top: 12px;">
+                    <label>Mode</label>
+                </div>
+                <select id="bg-transparency">
+                    <option value="opaque">Opaque</option>
+                    <option value="transparent">Transparent</option>
+                </select>
+
+                <!-- Background & Foreground Image Upload -->
+                <div style="display: flex; gap: 8px; margin-top: 16px;">
+                    <div class="control-btn image-upload-btn" id="bg-upload-btn" style="flex: 1; text-align: center; position: relative;">
+                        <span class="upload-text">Upload BG</span>
+                        <span class="remove-image" id="bg-remove-btn" style="display: none;">&times;</span>
+                    </div>
+                    <div class="control-btn image-upload-btn" id="fg-upload-btn" style="flex: 1; text-align: center; position: relative;">
+                        <span class="upload-text">Upload FG</span>
+                        <span class="remove-image" id="fg-remove-btn" style="display: none;">&times;</span>
+                    </div>
+                </div>
+                <input type="file" id="bg-image-input" accept="image/*" style="display: none;">
+                <input type="file" id="fg-image-input" accept="image/*" style="display: none;">
+            </div>
+
+            <!-- CANVAS SECTION -->
+            <div class="controls-section section-with-divider">
+                <h4>Canvas Size</h4>
+
+                <div class="frame-control-row">
+                    <label>Dimensions (px)</label>
+                </div>
+                <div class="size-inputs">
+                    <input type="number" id="canvas-width" value="800" min="100" max="5000">
+                    <span style="color: var(--text-color-subtle);">×</span>
+                    <input type="number" id="canvas-height" value="600" min="100" max="5000">
+                </div>
+
+                <div class="preset-buttons">
+                    <div class="preset-btn" data-size="800,600">HD</div>
+                    <div class="preset-btn" data-size="1920,1080">FHD</div>
+                    <div class="preset-btn" data-size="1080,1080">1:1</div>
+                    <div class="preset-btn" data-size="1080,1920">9:16</div>
+                    <div class="preset-btn" data-size="3840,2160">4K</div>
+                    <div class="preset-btn" data-size="1200,800">Custom</div>
+                </div>
+
             </div>
 
             <!-- EXPORT SECTION -->
