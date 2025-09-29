@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-Duplicator is a generative design tool for graphic designers who aren't animators. Built with HTML5 Canvas, it creates After Effects-style "repeater" effects by duplicating uploaded images with cumulative transformations and optional sine wave animations. The tool enables designers to create complex spiral, tunnel, and wave patterns with simple parameter controls.
+Duplicator is a generative design tool for graphic designers who aren't animators. Built with HTML5 Canvas, it creates After Effects-style "repeater" effects by duplicating uploaded images or custom text with cumulative transformations and optional sine wave animations. The tool features dual modes (Image and Text) and enables designers to create complex spiral, tunnel, and wave patterns with simple parameter controls.
 
 ## Quick Start
 
@@ -19,7 +19,9 @@ python -m http.server 8000
 ```
 
 ### Basic Workflow
-1. **Upload an image** (JPEG/PNG with alpha support)
+1. **Choose your mode**:
+   - **Image Mode**: Upload an image (JPEG/PNG with alpha support)
+   - **Text Mode**: Enter custom text with font selection
 2. **Adjust duplicates** (1-50 copies)
 3. **Set transformation offsets** to create patterns:
    - Scale Offset: Growing/shrinking effects
@@ -56,12 +58,15 @@ Duplicator/
 #### Core System
 - **FlexibleCanvasManager**: Handles canvas operations, sizing, background/foreground images
 - **DuplicatorAnimation**: Main duplication engine with transformation and animation logic
+- **Mode System**: Dual-mode interface (Image Mode / Text Mode) with tab switching
 - **Export System**: Integrated PNG, MP4, and PNG sequence export with alpha support
 - **UI Controls**: Real-time parameter adjustment with visual feedback
 
 #### Duplication System
-- **Image Upload**: FileReader API for JPEG/PNG with transparency support
+- **Image Mode**: FileReader API for JPEG/PNG with transparency support
+- **Text Mode**: Direct text rendering with multiple font families and variable font weights
 - **Cumulative Transformations**: Each duplicate builds upon the previous transformation
+- **Vector-like Text Rendering**: Text renders crisp at all scales without pixelation
 - **Animation Engine**: Sine wave modulation with time-offset delays
 - **Export Integration**: Works seamlessly with all export formats
 
@@ -70,7 +75,7 @@ Duplicator/
 ### Understanding the Duplicator Engine
 
 #### Core Concepts
-The Duplicator tool works by creating multiple copies of an uploaded image, where each copy has **cumulative transformations** applied:
+The Duplicator tool works by creating multiple copies of an uploaded image or custom text, where each copy has **cumulative transformations** applied:
 
 1. **Copy 0**: Original position/scale/rotation
 2. **Copy 1**: Original + 1× offset values
@@ -78,6 +83,12 @@ The Duplicator tool works by creating multiple copies of an uploaded image, wher
 4. **Copy N**: Original + N× offset values
 
 This creates exponential patterns like spirals, tunnels, and waves.
+
+#### Mode System
+The tool features two distinct modes:
+- **Image Mode**: Traditional image upload and duplication with image size controls
+- **Text Mode**: Text input with font selection, weight, size, and color controls
+- **Priority System**: When both image and text are present, image takes precedence
 
 #### DuplicatorAnimation Class Structure
 ```javascript
@@ -90,11 +101,21 @@ class DuplicatorAnimation {
         this.positionXOffset = 10;     // X position change per duplicate
         this.positionYOffset = 10;     // Y position change per duplicate
 
-        // Animation system
-        this.animationProperty = 'none'; // What to animate
-        this.frequency = 1.0;            // Animation speed (Hz)
-        this.amplitude = 50;             // Animation intensity
-        this.timeOffset = 5;             // Frame delay between duplicates
+        // Text parameters
+        this.textContent = '';         // Text input content
+        this.fontSize = 48;            // Base font size
+        this.fontWeight = 400;         // Font weight (400-800 for variable fonts)
+        this.textColor = '#ffffff';    // Text color
+        this.fontFamily = 'Wix Madefor Display'; // Selected font family
+
+        // Multi-parameter animation system
+        this.animations = {
+            scale: { enabled: false, frequency: 1.0, amplitude: 50 },
+            rotation: { enabled: false, frequency: 1.0, amplitude: 50 },
+            positionX: { enabled: false, frequency: 1.0, amplitude: 50 },
+            positionY: { enabled: false, frequency: 1.0, amplitude: 50 }
+        };
+        this.timeOffset = 5;           // Frame delay between duplicates
     }
 }
 ```
@@ -106,6 +127,19 @@ class DuplicatorAnimation {
 - **Animation**: Sine wave modulation on selected property with time delays
 
 ### Creating Patterns
+
+#### Font Support in Text Mode
+- **Wix Madefor Display**: Variable font (400-800 weight range)
+- **Inter**: Variable font (400-700 weight range)
+- **Roboto**: Standard weights (300, 400, 500, 700)
+- **Playfair Display**: Serif font (400, 500, 600, 700)
+- **Space Mono**: Monospace font (400, 700)
+
+#### Text Mode Advantages
+- **Vector-like Quality**: Text renders crisp at all scales without pixelation
+- **Font Size Control**: Font size acts as the "asset size" (no separate image size needed)
+- **Typography Flexibility**: Multiple fonts and variable font weight support
+- **Multi-line Support**: Text automatically handles line breaks
 
 #### Common Pattern Types
 
@@ -207,22 +241,30 @@ Export functionality is automatically handled by `ExportManager`. Animations onl
 ## Usage Examples
 
 ### Design Workflow Patterns
-#### Logo Multiplication
+#### Logo Multiplication (Image Mode)
 1. Upload your logo (PNG with transparency)
 2. Set duplicates to 8-12
 3. Apply small rotation offset (10-20°)
 4. Add subtle position offsets (5-10px)
 5. Export as PNG for use in presentations
 
+#### Typography Effects (Text Mode)
+1. Switch to Text Mode tab
+2. Enter your text (supports multi-line)
+3. Select appropriate font (Wix Madefor for variable weights)
+4. Adjust font size and weight
+5. Apply transformation patterns for dynamic text effects
+6. Export as PNG or MP4 for motion graphics
+
 #### Pattern Generation
-1. Upload a simple shape or icon
+1. Choose mode (Image: upload shape/icon, Text: enter text)
 2. High duplicate count (30-50)
 3. Combine rotation + scale offsets for complex patterns
 4. Use PNG sequence export for After Effects
 
 #### Motion Graphics Preview
-1. Upload design element
-2. Set up desired transformation pattern
+1. Set up your asset (Image Mode: upload, Text Mode: enter text)
+2. Configure desired transformation pattern
 3. Add animation (scale or rotation)
 4. Export MP4 for client preview
 5. Use PNG sequence for final production
@@ -243,7 +285,7 @@ render() {
         this.ctx.fillRect(0, 0, this.width, this.height);
     }
 
-    // 2. Duplicator animation (our tool)
+    // 2. Duplicator animation (supports both image and text)
     const time = Date.now() * 0.001;
     this.duplicatorAnimation.render(this.ctx, this.width, this.height, time);
 
@@ -254,12 +296,32 @@ render() {
 }
 ```
 
+#### Text Rendering Implementation
+The tool uses direct text rendering for crisp quality:
+```javascript
+renderTextDirect(ctx, scale) {
+    // Calculate scaled font size for vector-like quality
+    const scaledFontSize = this.fontSize * scale;
+
+    // Apply font family and weight
+    ctx.font = `${this.fontWeight} ${scaledFontSize}px '${this.fontFamily}'`;
+    ctx.fillStyle = this.textColor;
+
+    // Render each line with proper spacing
+    const lines = this.textContent.split('\n');
+    const lineHeight = scaledFontSize * 1.2;
+    // ... render each line
+}
+```
+
 #### Parameter Control Integration
 The tool integrates with the existing canvas template's control system:
-- Uses existing CSS classes for consistent styling
-- Leverages FlexibleCanvasManager for sizing and export
-- Maintains all background/foreground functionality
-- Preserves responsive display scaling
+- **Tab System**: Clean mode switching between Image and Text modes
+- **Font Integration**: Google Fonts loaded with variable font support
+- **CSS Consistency**: Uses existing classes for consistent styling
+- **Canvas Manager**: Leverages FlexibleCanvasManager for sizing and export
+- **Legacy Support**: Maintains all background/foreground functionality
+- **Responsive Design**: Preserves responsive display scaling
 
 ## Tool Architecture
 
@@ -272,10 +334,13 @@ The Duplicator tool is built as an **integrated enhancement** to the existing ca
 4. **Export Compatibility**: Works with all existing export formats
 
 ### Key Features
+- **Dual Mode System**: Image Mode and Text Mode with clean tab interface
+- **Vector-like Text**: Direct text rendering prevents pixelation at any scale
+- **Variable Font Support**: Full support for Wix Madefor Display and Inter variable fonts
+- **Multi-font Library**: 5 different fonts with appropriate weight ranges
 - **Dual Architecture**: Both modular ES6 and combined approaches supported
 - **Direct Browser Use**: Works immediately without server setup
-- **ES6 Module Development**: Clean modular structure for development
-- **Alpha Channel Support**: Full transparency preservation
+- **Alpha Channel Support**: Full transparency preservation in both modes
 - **Responsive Design**: Adapts to different screen sizes
 - **Professional Export**: PNG, MP4, PNG sequences with metadata
 
@@ -295,9 +360,12 @@ The Duplicator tool is built as an **integrated enhancement** to the existing ca
 
 ### Design Philosophy
 Built specifically for **graphic designers who aren't animators**, the tool focuses on:
-- **Simplicity**: Intuitive controls that map to familiar design concepts
+- **Versatility**: Dual-mode system handles both images and typography
+- **Simplicity**: Intuitive tab interface and controls that map to familiar design concepts
+- **Quality**: Vector-like text rendering and professional image handling
 - **Power**: Creates complex After Effects-style patterns with simple inputs
+- **Typography**: Full variable font support for modern design workflows
 - **Integration**: Works within existing design workflows
-- **Quality**: Professional-grade export suitable for client work
+- **Professional Output**: Export suitable for client work and production
 
-This focused approach makes complex generative design accessible to designers without requiring animation or coding knowledge.
+This focused approach makes complex generative design accessible to designers without requiring animation or coding knowledge, while providing advanced typography capabilities for modern design needs.

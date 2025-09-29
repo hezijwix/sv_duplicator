@@ -7,7 +7,7 @@
     <!-- Google Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400..700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400..700&family=Wix+Madefor+Display:wght@400..800&family=Roboto:wght@300;400;500;700&family=Playfair+Display:wght@400;500;600;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
 
     <!-- Stylesheet References -->
     <link rel="stylesheet" href="styles/variables.css">
@@ -37,45 +37,127 @@
             <div class="controls-section section-with-divider">
                 <h4>Duplicator</h4>
 
-                <!-- Image Upload -->
-                <div class="control-btn image-upload-btn" id="duplicator-upload-btn" style="text-align: center; position: relative;">
-                    <span class="upload-text">Upload Image</span>
-                    <span class="remove-image" id="duplicator-remove-btn" style="display: none;">&times;</span>
+                <!-- Mode Tabs -->
+                <div class="mode-tabs">
+                    <button class="mode-tab active" id="image-mode-tab">Image Mode</button>
+                    <button class="mode-tab" id="text-mode-tab">Text Mode</button>
                 </div>
-                <input type="file" id="duplicator-image-input" accept="image/*" style="display: none;">
 
-                <!-- Image Size -->
-                <div class="frame-control-row" style="margin-top: 16px;">
-                    <label>Image Size: <span id="image-size-value">100%</span></label>
-                </div>
-                <input type="range" id="image-size-slider" min="0.1" max="3" step="0.1" value="1">
+                <!-- Image Mode Content -->
+                <div class="mode-content" id="image-mode-content">
+                    <!-- Image Upload -->
+                    <div class="control-btn image-upload-btn" id="duplicator-upload-btn" style="text-align: center; position: relative; margin-top: 16px;">
+                        <span class="upload-text">Upload Image</span>
+                        <span class="remove-image" id="duplicator-remove-btn" style="display: none;">&times;</span>
+                    </div>
+                    <input type="file" id="duplicator-image-input" accept="image/*" style="display: none;">
 
-                <!-- Number of Duplicates -->
-                <div class="frame-control-row" style="margin-top: 16px;">
-                    <label>Duplicates: <span id="duplicates-value">5</span></label>
+                    <!-- Image Size -->
+                    <div class="frame-control-row" style="margin-top: 16px;">
+                        <label>Image Size: <span id="image-size-value">100%</span></label>
+                    </div>
+                    <input type="range" id="image-size-slider" min="0.1" max="3" step="0.1" value="1">
                 </div>
-                <input type="range" id="duplicates-slider" min="1" max="50" value="5">
 
-                <!-- Transformation Offsets -->
-                <div class="frame-control-row" style="margin-top: 16px;">
-                    <label>Scale Offset: <span id="scale-offset-value">0.00</span></label>
-                </div>
-                <input type="range" id="scale-offset-slider" min="-0.5" max="0.5" step="0.01" value="0">
+                <!-- Text Mode Content -->
+                <div class="mode-content" id="text-mode-content" style="display: none;">
+                    <!-- Font Selection -->
+                    <div class="frame-control-row" style="margin-top: 16px;">
+                        <label>Font:</label>
+                    </div>
+                    <select id="font-family" style="margin-top: 8px;">
+                        <option value="Wix Madefor Display">Wix Madefor Display</option>
+                        <option value="Inter">Inter</option>
+                        <option value="Roboto">Roboto</option>
+                        <option value="Playfair Display">Playfair Display</option>
+                        <option value="Space Mono">Space Mono</option>
+                    </select>
 
-                <div class="frame-control-row" style="margin-top: 16px;">
-                    <label>Rotation Offset: <span id="rotation-offset-value">0°</span></label>
-                </div>
-                <input type="range" id="rotation-offset-slider" min="-180" max="180" step="1" value="0">
+                    <!-- Text Input -->
+                    <div class="text-input-header" style="margin-top: 16px;">
+                        <label>Text:</label>
+                    </div>
+                    <textarea id="text-input" placeholder="Enter your text here..." rows="3" style="width: 100%; margin-bottom: 12px; resize: vertical;"></textarea>
 
-                <div class="frame-control-row" style="margin-top: 16px;">
-                    <label>Position X: <span id="position-x-value">10px</span></label>
-                </div>
-                <input type="range" id="position-x-slider" min="-100" max="100" step="1" value="10">
+                    <div class="frame-control-row">
+                        <label>Font Weight: <span id="font-weight-value">400</span></label>
+                    </div>
+                    <input type="range" id="font-weight-slider" min="400" max="800" step="25" value="400">
 
-                <div class="frame-control-row" style="margin-top: 16px;">
-                    <label>Position Y: <span id="position-y-value">10px</span></label>
+                    <div class="frame-control-row" style="margin-top: 12px;">
+                        <label>Font Size: <span id="font-size-value">48px</span></label>
+                    </div>
+                    <input type="range" id="font-size-slider" min="16" max="128" step="2" value="48">
+
+                    <div class="frame-control-row" style="margin-top: 12px;">
+                        <label for="text-color">Text Color:</label>
+                        <input type="color" id="text-color" value="#ffffff" style="margin-left: 8px; width: 40px; height: 24px;">
+                    </div>
                 </div>
-                <input type="range" id="position-y-slider" min="-100" max="100" step="1" value="10">
+
+                <!-- Shared Controls (shown in both modes) -->
+                <div class="shared-controls">
+                    <!-- Number of Duplicates -->
+                    <div class="frame-control-row" style="margin-top: 16px;">
+                        <label>Duplicates: <span id="duplicates-value">5</span></label>
+                    </div>
+                    <input type="range" id="duplicates-slider" min="1" max="50" value="5">
+
+                    <!-- Transformation Offsets -->
+                    <div class="frame-control-row" style="margin-top: 16px;">
+                        <label>Scale Offset: <span id="scale-offset-value">0.00</span></label>
+                    </div>
+                    <input type="range" id="scale-offset-slider" min="-0.5" max="0.5" step="0.01" value="0">
+
+                    <div class="frame-control-row" style="margin-top: 16px;">
+                        <label>Rotation Offset: <span id="rotation-offset-value">0°</span></label>
+                    </div>
+                    <input type="range" id="rotation-offset-slider" min="-180" max="180" step="1" value="0">
+
+                    <div class="frame-control-row" style="margin-top: 16px;">
+                        <label>Position X: <span id="position-x-value">10px</span></label>
+                    </div>
+                    <input type="range" id="position-x-slider" min="-100" max="100" step="1" value="10">
+
+                    <div class="frame-control-row" style="margin-top: 16px;">
+                        <label>Position Y: <span id="position-y-value">10px</span></label>
+                    </div>
+                    <input type="range" id="position-y-slider" min="-100" max="100" step="1" value="10">
+                </div>
+
+                <!-- Drop Shadow Controls -->
+                <div class="drop-shadow-section" style="margin-top: 20px;">
+                    <div class="parameter-header">
+                        <div class="parameter-checkbox-wrapper">
+                            <input type="checkbox" id="drop-shadow-enable" class="drop-shadow-checkbox">
+                            <label for="drop-shadow-enable">Drop Shadow</label>
+                        </div>
+                        <button class="parameter-toggle" aria-expanded="false" aria-controls="drop-shadow-controls">
+                            <span class="toggle-icon">▶</span>
+                        </button>
+                    </div>
+                    <div id="drop-shadow-controls" class="parameter-controls" style="display: none;">
+                        <div class="frame-control-row">
+                            <label>Distance: <span id="shadow-distance-value">10px</span></label>
+                        </div>
+                        <input type="range" id="shadow-distance" min="0" max="50" step="1" value="10">
+
+                        <div class="frame-control-row">
+                            <label>Softness: <span id="shadow-blur-value">5px</span></label>
+                        </div>
+                        <input type="range" id="shadow-blur" min="0" max="30" step="1" value="5">
+
+                        <div class="frame-control-row">
+                            <label>Opacity: <span id="shadow-opacity-value">50%</span></label>
+                        </div>
+                        <input type="range" id="shadow-opacity" min="0" max="100" step="5" value="50">
+
+                        <div class="frame-control-row">
+                            <label>Direction: <span id="shadow-angle-value">45°</span></label>
+                        </div>
+                        <input type="range" id="shadow-angle" min="0" max="360" step="5" value="45">
+                    </div>
+                </div>
             </div>
 
             <!-- ANIMATION CONTROLS SECTION -->
