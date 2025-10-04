@@ -489,6 +489,22 @@ class FlexibleCanvasManager {
         document.getElementById('export-btn').addEventListener('click', () => {
             document.getElementById('exportModal').style.display = 'flex';
             document.getElementById('exportSizeDisplay').textContent = `${this.width} × ${this.height}`;
+
+            // Reset to default state (in case user previously selected iframe)
+            const exportFormat = document.getElementById('exportFormat');
+            const startExportBtn = document.getElementById('startExport');
+            const durationSection = document.querySelector('.modal-section:has(#exportDuration)');
+
+            if (exportFormat.value === 'iframe') {
+                startExportBtn.textContent = 'Copy Code';
+                durationSection.style.display = 'none';
+            } else if (exportFormat.value === 'png') {
+                startExportBtn.textContent = 'Start Export';
+                durationSection.style.display = 'none';
+            } else {
+                startExportBtn.textContent = 'Start Export';
+                durationSection.style.display = 'block';
+            }
         });
 
         document.getElementById('closeExportModal').addEventListener('click', () => {
@@ -501,6 +517,20 @@ class FlexibleCanvasManager {
 
         document.getElementById('startExport').addEventListener('click', () => {
             this.handleExport();
+        });
+
+        // Update button text based on format selection
+        document.getElementById('exportFormat').addEventListener('change', (e) => {
+            const startExportBtn = document.getElementById('startExport');
+            const durationSection = document.querySelector('.modal-section:has(#exportDuration)');
+
+            if (e.target.value === 'iframe') {
+                startExportBtn.textContent = 'Copy Code';
+                durationSection.style.display = 'none';
+            } else {
+                startExportBtn.textContent = 'Start Export';
+                durationSection.style.display = e.target.value === 'png' ? 'none' : 'block';
+            }
         });
 
         // Click outside modal to close
@@ -916,6 +946,8 @@ class FlexibleCanvasManager {
             this.exportMP4(duration);
         } else if (format === 'png-sequence') {
             this.exportPNGSequence(duration);
+        } else if (format === 'iframe') {
+            this.exportIframe();
         }
     }
 
@@ -1100,6 +1132,219 @@ Timestamp: ${new Date().toISOString()}`;
             exportBtn.disabled = false;
             this.isExporting = false;
         }
+    }
+
+    exportIframe() {
+        // Get current animation settings
+        const dupl = this.duplicatorAnimation;
+        const settings = {
+            // Canvas size
+            width: this.width,
+            height: this.height,
+
+            // Mode and content
+            mode: dupl.getCurrentMode(),
+
+            // Image mode
+            imageData: dupl.sourceImage ? this.canvas.toDataURL() : null,
+            imageSize: dupl.imageSize,
+
+            // Text mode
+            textContent: dupl.textContent,
+            fontSize: dupl.fontSize,
+            fontWeight: dupl.fontWeight,
+            textColor: dupl.textColor,
+            fontFamily: dupl.fontFamily,
+
+            // Duplication parameters
+            duplicates: dupl.duplicates,
+            scaleOffset: dupl.scaleOffset,
+            rotationOffset: dupl.rotationOffset,
+            positionXOffset: dupl.positionXOffset,
+            positionYOffset: dupl.positionYOffset,
+
+            // Animation settings
+            animations: dupl.animations,
+            timeOffset: dupl.timeOffset,
+
+            // Drop shadow
+            dropShadow: dupl.dropShadow,
+
+            // Background
+            backgroundColor: this.backgroundColor,
+            isTransparent: this.isTransparent
+        };
+
+        // Generate the iframe HTML code
+        const iframeCode = this.generateIframeCode(settings);
+
+        // Copy to clipboard
+        navigator.clipboard.writeText(iframeCode).then(() => {
+            alert('iframe code copied to clipboard! Paste it into your webpage.');
+        }).catch(err => {
+            // Fallback: show code in alert
+            console.error('Could not copy to clipboard:', err);
+            prompt('Copy this iframe code:', iframeCode);
+        });
+    }
+
+    generateIframeCode(settings) {
+        // Escape special characters in text content
+        const escapeHtml = (text) => {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        };
+
+        return `<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Duplicator Animation</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400..700&family=Wix+Madefor+Display:wght@400..800&family=Roboto:wght@300;400;500;700&family=Playfair+Display:wght@400;500;600;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            background: #1a1a1a;
+        }
+        canvas {
+            display: block;
+            max-width: 100%;
+            max-height: 100vh;
+        }
+    </style>
+</head>
+<body>
+    <canvas id="canvas"></canvas>
+    <script>
+        const canvas = document.getElementById('canvas');
+        const ctx = canvas.getContext('2d');
+
+        // Settings from export
+        const settings = ${JSON.stringify(settings, null, 8)};
+
+        // Set canvas size
+        canvas.width = settings.width;
+        canvas.height = settings.height;
+
+        // Load image if in image mode
+        let sourceImage = null;
+        if (settings.mode === 'image' && settings.imageData) {
+            sourceImage = new Image();
+            sourceImage.src = settings.imageData;
+        }
+
+        // Animation render function
+        function render(time) {
+            // Clear canvas
+            if (settings.isTransparent) {
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+            } else {
+                ctx.fillStyle = settings.backgroundColor;
+                ctx.fillRect(0, 0, canvas.width, canvas.height);
+            }
+
+            // Render duplicates from highest index to lowest (bottom to top)
+            for (let i = settings.duplicates - 1; i >= 0; i--) {
+                ctx.save();
+
+                // Calculate base transformations
+                let scale = Math.pow(1 + settings.scaleOffset, i);
+                let rotation = settings.rotationOffset * i * (Math.PI / 180);
+                let posX = canvas.width / 2 + settings.positionXOffset * i;
+                let posY = canvas.height / 2 + settings.positionYOffset * i;
+
+                // Apply animations if enabled
+                const frameOffset = i * settings.timeOffset / 60;
+                const animTime = time - frameOffset;
+
+                if (settings.animations.scale.enabled && animTime > 0) {
+                    const wave = Math.sin(animTime * settings.animations.scale.frequency * Math.PI * 2);
+                    scale *= 1 + (wave * settings.animations.scale.amplitude / 100);
+                }
+
+                if (settings.animations.rotation.enabled && animTime > 0) {
+                    const wave = Math.sin(animTime * settings.animations.rotation.frequency * Math.PI * 2);
+                    rotation += wave * settings.animations.rotation.amplitude * (Math.PI / 180);
+                }
+
+                if (settings.animations.positionX.enabled && animTime > 0) {
+                    const wave = Math.sin(animTime * settings.animations.positionX.frequency * Math.PI * 2);
+                    posX += wave * settings.animations.positionX.amplitude;
+                }
+
+                if (settings.animations.positionY.enabled && animTime > 0) {
+                    const wave = Math.sin(animTime * settings.animations.positionY.frequency * Math.PI * 2);
+                    posY += wave * settings.animations.positionY.amplitude;
+                }
+
+                // Apply transformations
+                ctx.translate(posX, posY);
+                ctx.rotate(rotation);
+                ctx.scale(scale, scale);
+
+                // Apply drop shadow if enabled
+                if (settings.dropShadow.enabled) {
+                    const angleRad = settings.dropShadow.angle * (Math.PI / 180);
+                    const offsetX = Math.cos(angleRad) * settings.dropShadow.distance;
+                    const offsetY = Math.sin(angleRad) * settings.dropShadow.distance;
+
+                    ctx.shadowColor = 'rgba(0, 0, 0, ' + settings.dropShadow.opacity + ')';
+                    ctx.shadowBlur = settings.dropShadow.blur;
+                    ctx.shadowOffsetX = offsetX;
+                    ctx.shadowOffsetY = offsetY;
+                }
+
+                // Render based on mode
+                if (settings.mode === 'image' && sourceImage && sourceImage.complete) {
+                    const imgWidth = sourceImage.width * settings.imageSize;
+                    const imgHeight = sourceImage.height * settings.imageSize;
+                    ctx.drawImage(sourceImage, -imgWidth / 2, -imgHeight / 2, imgWidth, imgHeight);
+                } else if (settings.mode === 'text' && settings.textContent) {
+                    const scaledFontSize = settings.fontSize * scale;
+                    ctx.font = settings.fontWeight + ' ' + scaledFontSize + 'px "' + settings.fontFamily + '"';
+                    ctx.fillStyle = settings.textColor;
+                    ctx.textAlign = 'center';
+                    ctx.textBaseline = 'middle';
+
+                    const lines = settings.textContent.split('\\n');
+                    const lineHeight = scaledFontSize * 1.2;
+                    const totalHeight = lines.length * lineHeight;
+                    const startY = -totalHeight / 2 + lineHeight / 2;
+
+                    lines.forEach((line, index) => {
+                        ctx.fillText(line, 0, startY + index * lineHeight);
+                    });
+                }
+
+                ctx.restore();
+            }
+        }
+
+        // Start animation
+        function animate() {
+            const time = Date.now() * 0.001;
+            render(time);
+            requestAnimationFrame(animate);
+        }
+
+        // Wait for image to load if needed
+        if (sourceImage) {
+            sourceImage.onload = animate;
+        } else {
+            animate();
+        }
+    </script>
+</body>
+</html>`;
     }
 }
 
