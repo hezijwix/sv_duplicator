@@ -21,7 +21,10 @@ class DuplicatorAnimation {
         this.fontSize = 48;
         this.fontWeight = 400;
         this.textColor = '#ffffff';
+        this.textColorEnd = '#ffffff';
         this.fontFamily = 'Wix Madefor Display';
+        this.outlineThickness = 0;
+        this.outlineColor = '#000000';
 
         // Multi-parameter animation system
         this.animations = {
@@ -110,8 +113,20 @@ class DuplicatorAnimation {
                 this.textColor = value;
                 this.generateTextImage();
                 break;
+            case 'textColorEnd':
+                this.textColorEnd = value;
+                this.generateTextImage();
+                break;
             case 'fontFamily':
                 this.fontFamily = value;
+                this.generateTextImage();
+                break;
+            case 'outlineThickness':
+                this.outlineThickness = parseFloat(value);
+                this.generateTextImage();
+                break;
+            case 'outlineColor':
+                this.outlineColor = value;
                 this.generateTextImage();
                 break;
             // Multi-parameter animation controls
@@ -191,8 +206,8 @@ class DuplicatorAnimation {
         const maxWidth = Math.max(...lines.map(line => tempCtx.measureText(line).width));
         const totalHeight = lines.length * lineHeight;
 
-        // Set canvas size with padding
-        const padding = 20;
+        // Set canvas size with padding (extra padding for outline)
+        const padding = 20 + (this.outlineThickness * 2);
         tempCanvas.width = maxWidth + (padding * 2);
         tempCanvas.height = totalHeight + (padding * 2);
 
@@ -200,7 +215,6 @@ class DuplicatorAnimation {
         tempCtx.font = `${this.fontWeight} ${this.fontSize}px 'Wix Madefor Display', sans-serif`;
         tempCtx.textAlign = 'center';
         tempCtx.textBaseline = 'middle';
-        tempCtx.fillStyle = this.textColor;
 
         // Draw each line of text
         const centerX = tempCanvas.width / 2;
@@ -208,6 +222,18 @@ class DuplicatorAnimation {
 
         lines.forEach((line, index) => {
             const y = startY + (index * lineHeight);
+
+            // Draw outline if thickness > 0
+            if (this.outlineThickness > 0) {
+                tempCtx.strokeStyle = this.outlineColor;
+                tempCtx.lineWidth = this.outlineThickness * 2; // Double the thickness for outward stroke
+                tempCtx.lineJoin = 'round';
+                tempCtx.miterLimit = 2;
+                tempCtx.strokeText(line, centerX, y);
+            }
+
+            // Draw fill on top
+            tempCtx.fillStyle = this.textColor;
             tempCtx.fillText(line, centerX, y);
         });
 
@@ -314,14 +340,14 @@ class DuplicatorAnimation {
                 ctx.drawImage(this.sourceImage, -imgWidth / 2, -imgHeight / 2, imgWidth, imgHeight);
             } else if (shouldRenderText) {
                 // Render text directly at the appropriate size for crisp rendering
-                this.renderTextDirect(ctx, finalScale);
+                this.renderTextDirect(ctx, finalScale, i);
             }
 
             ctx.restore();
         }
     }
 
-    renderTextDirect(ctx, scale) {
+    renderTextDirect(ctx, scale, duplicateIndex) {
         // Calculate scaled font size for crisp rendering
         const scaledFontSize = this.fontSize * scale;
 
@@ -341,7 +367,10 @@ class DuplicatorAnimation {
 
         ctx.textAlign = 'center';
         ctx.textBaseline = 'middle';
-        ctx.fillStyle = this.textColor;
+
+        // Calculate gradient color based on duplicate index
+        const t = this.duplicates > 1 ? duplicateIndex / (this.duplicates - 1) : 0;
+        const gradientColor = this.interpolateColor(this.textColor, this.textColorEnd, t);
 
         // Split text into lines and render each line
         const lines = this.textContent.split('\n');
@@ -350,8 +379,39 @@ class DuplicatorAnimation {
 
         lines.forEach((line, index) => {
             const y = startY + (index * lineHeight);
+
+            // Draw outline if thickness > 0
+            if (this.outlineThickness > 0) {
+                ctx.strokeStyle = this.outlineColor;
+                ctx.lineWidth = (this.outlineThickness * 2) / scale; // Constant width regardless of scale
+                ctx.lineJoin = 'round';
+                ctx.miterLimit = 2;
+                ctx.strokeText(line, 0, y);
+            }
+
+            // Draw fill text on top with gradient color
+            ctx.fillStyle = gradientColor;
             ctx.fillText(line, 0, y);
         });
+    }
+
+    interpolateColor(color1, color2, t) {
+        // Parse hex colors to RGB
+        const r1 = parseInt(color1.slice(1, 3), 16);
+        const g1 = parseInt(color1.slice(3, 5), 16);
+        const b1 = parseInt(color1.slice(5, 7), 16);
+
+        const r2 = parseInt(color2.slice(1, 3), 16);
+        const g2 = parseInt(color2.slice(3, 5), 16);
+        const b2 = parseInt(color2.slice(5, 7), 16);
+
+        // Interpolate
+        const r = Math.round(r1 + (r2 - r1) * t);
+        const g = Math.round(g1 + (g2 - g1) * t);
+        const b = Math.round(b1 + (b2 - b1) * t);
+
+        // Convert back to hex
+        return `#${((1 << 24) + (r << 16) + (g << 8) + b).toString(16).slice(1)}`;
     }
 }
 
@@ -596,6 +656,21 @@ class FlexibleCanvasManager {
 
         document.getElementById('text-color').addEventListener('input', (e) => {
             this.duplicatorAnimation.setParameter('textColor', e.target.value);
+        });
+
+        document.getElementById('text-color-end').addEventListener('input', (e) => {
+            this.duplicatorAnimation.setParameter('textColorEnd', e.target.value);
+        });
+
+        // Text outline controls
+        document.getElementById('outline-thickness-slider').addEventListener('input', (e) => {
+            const value = parseInt(e.target.value);
+            this.duplicatorAnimation.setParameter('outlineThickness', value);
+            document.getElementById('outline-thickness-value').textContent = value + 'px';
+        });
+
+        document.getElementById('outline-color').addEventListener('input', (e) => {
+            this.duplicatorAnimation.setParameter('outlineColor', e.target.value);
         });
 
         // Font family selector
