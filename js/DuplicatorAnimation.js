@@ -18,7 +18,10 @@ export class DuplicatorAnimation {
         this.fontSize = 48;
         this.fontWeight = 400;
         this.textColor = '#ffffff';
+        this.textColorEnd = '#ffffff';
         this.fontFamily = 'Wix Madefor Display';
+        this.outlineThickness = 0;
+        this.outlineColor = '#000000';
 
         // Multi-parameter animation system
         this.animations = {
@@ -107,8 +110,20 @@ export class DuplicatorAnimation {
                 this.textColor = value;
                 this.generateTextImage();
                 break;
+            case 'textColorEnd':
+                this.textColorEnd = value;
+                this.generateTextImage();
+                break;
             case 'fontFamily':
                 this.fontFamily = value;
+                this.generateTextImage();
+                break;
+            case 'outlineThickness':
+                this.outlineThickness = parseFloat(value);
+                this.generateTextImage();
+                break;
+            case 'outlineColor':
+                this.outlineColor = value;
                 this.generateTextImage();
                 break;
             // Multi-parameter animation controls
@@ -311,14 +326,14 @@ export class DuplicatorAnimation {
                 ctx.drawImage(this.sourceImage, -imgWidth / 2, -imgHeight / 2, imgWidth, imgHeight);
             } else if (shouldRenderText) {
                 // Render text directly at the appropriate size for crisp rendering
-                this.renderTextDirect(ctx, finalScale);
+                this.renderTextDirect(ctx, finalScale, i);
             }
 
             ctx.restore();
         }
     }
 
-    renderTextDirect(ctx, scale) {
+    renderTextDirect(ctx, scale, duplicateIndex) {
         // Calculate scaled font size for crisp rendering
         const scaledFontSize = this.fontSize * scale;
 
@@ -338,7 +353,10 @@ export class DuplicatorAnimation {
 
         ctx.textAlign = 'center';
         ctx.textBaseline = 'middle';
-        ctx.fillStyle = this.textColor;
+
+        // Calculate gradient color based on duplicate index
+        const t = this.duplicates > 1 ? duplicateIndex / (this.duplicates - 1) : 0;
+        const gradientColor = this.interpolateColor(this.textColor, this.textColorEnd, t);
 
         // Split text into lines and render each line
         const lines = this.textContent.split('\n');
@@ -347,7 +365,38 @@ export class DuplicatorAnimation {
 
         lines.forEach((line, index) => {
             const y = startY + (index * lineHeight);
+
+            // Draw outline if thickness > 0
+            if (this.outlineThickness > 0) {
+                ctx.strokeStyle = this.outlineColor;
+                ctx.lineWidth = (this.outlineThickness * 2) / scale; // Constant width regardless of scale
+                ctx.lineJoin = 'round';
+                ctx.miterLimit = 2;
+                ctx.strokeText(line, 0, y);
+            }
+
+            // Draw fill text on top with gradient color
+            ctx.fillStyle = gradientColor;
             ctx.fillText(line, 0, y);
         });
+    }
+
+    interpolateColor(color1, color2, t) {
+        // Parse hex colors to RGB
+        const r1 = parseInt(color1.slice(1, 3), 16);
+        const g1 = parseInt(color1.slice(3, 5), 16);
+        const b1 = parseInt(color1.slice(5, 7), 16);
+
+        const r2 = parseInt(color2.slice(1, 3), 16);
+        const g2 = parseInt(color2.slice(3, 5), 16);
+        const b2 = parseInt(color2.slice(5, 7), 16);
+
+        // Interpolate
+        const r = Math.round(r1 + (r2 - r1) * t);
+        const g = Math.round(g1 + (g2 - g1) * t);
+        const b = Math.round(b1 + (b2 - b1) * t);
+
+        // Convert back to hex
+        return `#${((1 << 24) + (r << 16) + (g << 8) + b).toString(16).slice(1)}`;
     }
 }

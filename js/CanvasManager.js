@@ -194,6 +194,47 @@ export class FlexibleCanvasManager {
             document.getElementById('duplicator-image-input').value = '';
         });
 
+        // Text input controls
+        document.getElementById('text-input').addEventListener('input', (e) => {
+            this.duplicatorAnimation.setParameter('textContent', e.target.value);
+        });
+
+        document.getElementById('font-weight-slider').addEventListener('input', (e) => {
+            const value = parseInt(e.target.value);
+            this.duplicatorAnimation.setParameter('fontWeight', value);
+            document.getElementById('font-weight-value').textContent = value;
+        });
+
+        document.getElementById('font-size-slider').addEventListener('input', (e) => {
+            const value = parseInt(e.target.value);
+            this.duplicatorAnimation.setParameter('fontSize', value);
+            document.getElementById('font-size-value').textContent = value + 'px';
+        });
+
+        document.getElementById('text-color').addEventListener('input', (e) => {
+            this.duplicatorAnimation.setParameter('textColor', e.target.value);
+        });
+
+        document.getElementById('text-color-end').addEventListener('input', (e) => {
+            this.duplicatorAnimation.setParameter('textColorEnd', e.target.value);
+        });
+
+        // Text outline controls
+        document.getElementById('outline-thickness-slider').addEventListener('input', (e) => {
+            const value = parseInt(e.target.value);
+            this.duplicatorAnimation.setParameter('outlineThickness', value);
+            document.getElementById('outline-thickness-value').textContent = value + 'px';
+        });
+
+        document.getElementById('outline-color').addEventListener('input', (e) => {
+            this.duplicatorAnimation.setParameter('outlineColor', e.target.value);
+        });
+
+        // Font family selector
+        document.getElementById('font-family').addEventListener('change', (e) => {
+            this.duplicatorAnimation.setParameter('fontFamily', e.target.value);
+        });
+
         // Image size slider
         document.getElementById('image-size-slider').addEventListener('input', (e) => {
             const value = parseFloat(e.target.value);
