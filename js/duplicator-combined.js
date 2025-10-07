@@ -1229,7 +1229,10 @@ Timestamp: ${new Date().toISOString()}`;
             fontSize: dupl.fontSize,
             fontWeight: dupl.fontWeight,
             textColor: dupl.textColor,
+            textColorEnd: dupl.textColorEnd,
             fontFamily: dupl.fontFamily,
+            outlineThickness: dupl.outlineThickness,
+            outlineColor: dupl.outlineColor,
 
             // Duplication parameters
             duplicates: dupl.duplicates,
@@ -1317,6 +1320,26 @@ Timestamp: ${new Date().toISOString()}`;
             sourceImage.src = settings.imageData;
         }
 
+        // Color interpolation helper
+        function interpolateColor(color1, color2, t) {
+            // Parse hex colors to RGB
+            const r1 = parseInt(color1.slice(1, 3), 16);
+            const g1 = parseInt(color1.slice(3, 5), 16);
+            const b1 = parseInt(color1.slice(5, 7), 16);
+
+            const r2 = parseInt(color2.slice(1, 3), 16);
+            const g2 = parseInt(color2.slice(3, 5), 16);
+            const b2 = parseInt(color2.slice(5, 7), 16);
+
+            // Interpolate
+            const r = Math.round(r1 + (r2 - r1) * t);
+            const g = Math.round(g1 + (g2 - g1) * t);
+            const b = Math.round(b1 + (b2 - b1) * t);
+
+            // Convert back to hex
+            return '#' + ((1 << 24) + (r << 16) + (g << 8) + b).toString(16).slice(1);
+        }
+
         // Animation render function
         function render(time) {
             // Clear canvas
@@ -1386,9 +1409,12 @@ Timestamp: ${new Date().toISOString()}`;
                 } else if (settings.mode === 'text' && settings.textContent) {
                     const scaledFontSize = settings.fontSize * scale;
                     ctx.font = settings.fontWeight + ' ' + scaledFontSize + 'px "' + settings.fontFamily + '"';
-                    ctx.fillStyle = settings.textColor;
                     ctx.textAlign = 'center';
                     ctx.textBaseline = 'middle';
+
+                    // Calculate gradient color based on duplicate index
+                    const t = settings.duplicates > 1 ? i / (settings.duplicates - 1) : 0;
+                    const gradientColor = interpolateColor(settings.textColor, settings.textColorEnd, t);
 
                     const lines = settings.textContent.split('\\n');
                     const lineHeight = scaledFontSize * 1.2;
@@ -1396,7 +1422,20 @@ Timestamp: ${new Date().toISOString()}`;
                     const startY = -totalHeight / 2 + lineHeight / 2;
 
                     lines.forEach((line, index) => {
-                        ctx.fillText(line, 0, startY + index * lineHeight);
+                        const y = startY + index * lineHeight;
+
+                        // Draw outline if thickness > 0
+                        if (settings.outlineThickness > 0) {
+                            ctx.strokeStyle = settings.outlineColor;
+                            ctx.lineWidth = (settings.outlineThickness * 2) / scale;
+                            ctx.lineJoin = 'round';
+                            ctx.miterLimit = 2;
+                            ctx.strokeText(line, 0, y);
+                        }
+
+                        // Draw fill text on top with gradient color
+                        ctx.fillStyle = gradientColor;
+                        ctx.fillText(line, 0, y);
                     });
                 }
 
