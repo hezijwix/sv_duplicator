@@ -372,7 +372,18 @@
                     <input type="number" id="exportDuration" class="modal-input" min="1" max="60" value="5">
                     <span class="modal-hint">For video export</span>
                 </div>
-                
+
+                <div class="modal-section">
+                    <label for="exportFPS" class="modal-label">Frame Rate (FPS)</label>
+                    <select id="exportFPS" class="modal-select">
+                        <option value="25">25 FPS (PAL)</option>
+                        <option value="30" selected>30 FPS (NTSC)</option>
+                        <option value="50">50 FPS</option>
+                        <option value="60">60 FPS</option>
+                    </select>
+                    <span class="modal-hint">For video and PNG sequence export</span>
+                </div>
+
                 <div class="modal-section">
                     <label for="exportFormat" class="modal-label">Format</label>
                     <select id="exportFormat" class="modal-select">

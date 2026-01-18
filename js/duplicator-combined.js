@@ -1041,7 +1041,7 @@ class FlexibleCanvasManager {
         const originalText = exportBtn.textContent;
 
         try {
-            const fps = 30;
+            const fps = parseInt(document.getElementById('exportFPS').value);
             const frames = duration * fps;
             const zip = new JSZip();
 
@@ -1119,7 +1119,8 @@ Timestamp: ${new Date().toISOString()}`;
             exportBtn.disabled = true;
             this.isExporting = true;
 
-            const stream = this.canvas.captureStream(30);
+            const fps = parseInt(document.getElementById('exportFPS').value);
+            const stream = this.canvas.captureStream(fps);
 
             const formats = [
                 { mimeType: 'video/mp4; codecs="avc1.42E01E"', extension: 'mp4' },
